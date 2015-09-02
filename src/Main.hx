@@ -82,6 +82,10 @@ class Main
                     {
                         trace("Expecting <" + expect.output + "> but got <" + result + ">");
                     }
+                    else
+                    {
+                        trace("`" + expect.output + "` succeed...");
+                    }
                 }
                 catch (err:String)
                 {

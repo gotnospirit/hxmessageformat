@@ -21,6 +21,13 @@ class Literal
 
     public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, String>)
     {
+        var content:Array<String> = cast expr;
+
+        for (c in content)
+        {
+            // trace(c);
+            output.add(c);
+        }
     }
 
     public static function Parse(reader:StringReader)

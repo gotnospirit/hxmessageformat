@@ -40,7 +40,7 @@ class MessageFormat
 
     public function format(?params:Map<String, String>)
     {
-        root.debug();
+        // root.debug();
 
         var buffer = new StringBuf();
         root.format(buffer, this, params);

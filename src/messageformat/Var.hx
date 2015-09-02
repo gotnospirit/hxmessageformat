@@ -15,6 +15,14 @@ class Var
 
     public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, String>)
     {
+        var name:String = cast expr;
+
+        if (null != params && params.exists(name))
+        {
+            var value = params.get(name);
+            // trace(value);
+            output.add(value);
+        }
     }
 
     public static function Parse(reader:StringReader)
