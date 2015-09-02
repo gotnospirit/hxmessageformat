@@ -1,0 +1,1 @@
+cls && haxe -main Main --interp -cp src
