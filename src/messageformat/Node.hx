@@ -14,7 +14,7 @@ class Node
         children.push(new NodeExpr(type, expr));
     }
 
-    public function format(output:StringBuf, mf:MessageFormat, ?params:Map<String, String>)
+    public function format(output:StringBuf, mf:MessageFormat, ?params:Map<String, Dynamic>)
     {
         for (child in children)
         {

@@ -13,27 +13,13 @@ class NodeExpr extends Node
         this.expr = expr;
     }
 
-    override public function format(output:StringBuf, mf:MessageFormat, ?params:Map<String, String>)
+    override public function format(output:StringBuf, mf:MessageFormat, ?params:Map<String, Dynamic>)
     {
         var formatter = mf.get(type);
 
-        formatter(expr, output, params);
+        if (null != formatter)
+        {
+            formatter(expr, output, params);
+        }
     }
-
-// func (x *node) format(ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, pound string) error {
-	// for _, child := range x.children {
-		// ctype := child.ctype
-
-		// fn, err := ptr_mf.getFormatter(ctype)
-		// if nil != err {
-			// return err
-		// }
-
-		// err = fn(child.expr, ptr_output, data, ptr_mf, pound)
-		// if nil != err {
-			// return err
-		// }
-	// }
-	// return nil
-// }
 }

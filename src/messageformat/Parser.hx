@@ -96,8 +96,7 @@ class Parser
 
                     if (pos > start)
                     {
-                        // trace("ADD LITERAL 1");
-                        parent.add("literal", Literal.Parse(reader.slice(start)));
+                        parent.add("literal", Literal.Parse(reader, start));
                     }
 
                     // consume {
@@ -134,8 +133,7 @@ class Parser
 
         if (pos > start)
         {
-            // trace("ADD LITERAL 2");
-            parent.add("literal", Literal.Parse(reader.slice(start)));
+            parent.add("literal", Literal.Parse(reader, start));
         }
         return reader.hasNext();
     }

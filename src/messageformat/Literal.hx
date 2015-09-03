@@ -19,7 +19,7 @@ class Literal
 	// return nil
 // }
 
-    public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, String>)
+    public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, Dynamic>)
     {
         var content:Array<String> = cast expr;
 
@@ -30,8 +30,9 @@ class Literal
         }
     }
 
-    public static function Parse(reader:StringReader)
+    public static function Parse(input:StringReader, start:Int)
     {
+        var reader = input.slice(start);
         var items = new Array<Int>();
         var escaped = false;
         var s = reader.pos();

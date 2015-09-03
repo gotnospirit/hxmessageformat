@@ -4,24 +4,16 @@ import haxe.Utf8;
 
 class Var
 {
-// func formatVar(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, _ *MessageFormat, _ string) error {
-	// value, err := toString(*data, expr.(string))
-	// if nil != err {
-		// return err
-	// }
-	// ptr_output.WriteString(value)
-	// return nil
-// }
-
-    public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, String>)
+    public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, Dynamic>)
     {
-        var name:String = cast expr;
-
-        if (null != params && params.exists(name))
+        if (null != params)
         {
-            var value = params.get(name);
-            // trace(value);
-            output.add(value);
+            var value = Utils.ToString(cast expr, params);
+
+            if ("" != value)
+            {
+                output.add(value);
+            }
         }
     }
 
@@ -44,16 +36,17 @@ class Var
             }
             else if (reader.isWhitespace())
             {
-                reader.next();
                 reader.whitespace();
             }
             else if ((!reader.isUnderscore() && !reader.isAlphaNumeric()) || (reader.pos() != lc_pos))
             {
                 throw "InvalidFormat";
             }
-
-            reader.next();
-            lc_pos = reader.pos();
+            else
+            {
+                reader.next();
+                lc_pos = reader.pos();
+            }
         }
         throw "UnbalancedBraces";
     }

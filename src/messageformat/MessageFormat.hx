@@ -1,6 +1,6 @@
 package messageformat;
 
-typedef Formatter = Dynamic -> StringBuf -> Map<String, String> -> Void;
+typedef Formatter = Dynamic -> StringBuf -> Map<String, Dynamic> -> Void;
 
 class MessageFormat
 {
@@ -38,7 +38,7 @@ class MessageFormat
         return result;
     }
 
-    public function format(?params:Map<String, String>)
+    public function format(?params:Map<String, Dynamic>)
     {
         // root.debug();
 
