@@ -1,49 +1,40 @@
 package messageformat;
 
-import haxe.Utf8;
-
 class Literal
 {
-// func formatLiteral(expr Expression, ptr_output *bytes.Buffer, _ *map[string]interface{}, _ *MessageFormat, pound string) error {
-	// content := expr.([]string)
-
-	// for _, c := range content {
-		// if "" != c {
-			// ptr_output.WriteString(c)
-		// } else if "" != pound {
-			// ptr_output.WriteString(pound)
-		// } else {
-			// ptr_output.WriteRune(PoundChar)
-		// }
-	// }
-	// return nil
-// }
-
-    public static function Format(expr:Dynamic, output:StringBuf, ?params:Map<String, Dynamic>)
+    public static function Format(expr:Dynamic, output:StringBuf, _:Map<String, Dynamic>, _:MessageFormat, pound:String):Void
     {
         var content:Array<String> = cast expr;
 
         for (c in content)
         {
-            // trace(c);
-            output.add(c);
+            if ("" != c)
+            {
+                output.add(c);
+            }
+            else if ("" != pound)
+            {
+                output.add(pound);
+            }
+            else
+            {
+                output.add("#");
+            }
         }
     }
 
-    public static function Parse(input:StringReader, start:Int)
+    public static function Parse(input:StringReader, start:Int):Array<String>
     {
-        var reader = input.slice(start);
+        var reader = new StringReader(input.substr(start, input.pos));
         var items = new Array<Int>();
         var escaped = false;
-        var s = reader.pos();
+        var s = reader.pos;
         var e = s;
         var gap = 0;
         var pos = s;
 
-        while (reader.hasNext())
+        while (!reader.eof())
         {
-            reader.next();
-
             if (reader.isEscape())
             {
                 ++gap;
@@ -105,10 +96,11 @@ class Literal
                 gap = 0;
             }
 
-            ++pos;
+            reader.next();
+            pos = reader.pos;
         }
 
-        var end = reader.length();
+        var end = reader.length;
         if (s < end)
         {
             items.push(s);
@@ -116,19 +108,11 @@ class Literal
         }
 
         var result = new Array<String>();
+        var i = 0;
+        while (i < items.length)
         {
-            var i = 0;
-            while (i < items.length)
-            {
-                var s = items[i];
-                var e = items[i + 1];
-
-                if (s != e)
-                {
-                    result.push(reader.substr(s, e));
-                }
-                i += 2;
-            }
+            result.push(reader.substr(items[i], items[i + 1]));
+            i += 2;
         }
         return result;
     }

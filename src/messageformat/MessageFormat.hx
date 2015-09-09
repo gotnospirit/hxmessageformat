@@ -1,29 +1,20 @@
 package messageformat;
 
-typedef Formatter = Dynamic -> StringBuf -> Map<String, Dynamic> -> Void;
-
 class MessageFormat
 {
     var root:Node;
-    var formatters:Map<String, Formatter>;
+    var formatters:Map<String, Parser.FormatFunction>;
+    var plural:ICURule.PluralFunction;
 
-	public function new(root:Node)
+	public function new(root:Node, formatters:Map<String, Parser.FormatFunction>, ?plural:ICURule.PluralFunction)
     {
         this.root = root;
-        formatters = new Map<String, Formatter>();
+        this.formatters = formatters;
+        this.plural = plural;
     }
 
-    public function set(key:String, fn:Formatter)
-    {
-        if (formatters.exists(key))
-        {
-            throw "ParserAlreadyRegistered";
-        }
-        formatters.set(key, fn);
-        return this;
-    }
-
-    public function get(key:String)
+    // @TODO -> formatNode
+    public function get(key:String):Parser.FormatFunction
     {
         if (!formatters.exists(key))
         {
@@ -38,12 +29,21 @@ class MessageFormat
         return result;
     }
 
-    public function format(?params:Map<String, Dynamic>)
+    public function getNamedKey(n:Dynamic, ordinal:Bool):String
+    {
+        if (null == plural)
+        {
+            throw "UndefinedPluralFunc";
+        }
+        return plural(n, ordinal);
+    }
+
+    public function format(?params:Map<String, Dynamic>):String
     {
         // root.debug();
 
         var buffer = new StringBuf();
-        root.format(buffer, this, params);
+        root.format(buffer, this, params, "");
         return buffer.toString();
     }
 }

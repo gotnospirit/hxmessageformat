@@ -1,33 +1,66 @@
 package messageformat;
 
-import haxe.Utf8;
+typedef ParseFunction = String -> Parser -> StringReader -> Dynamic;
+typedef FormatFunction = Dynamic -> StringBuf -> Map<String, Dynamic> -> MessageFormat -> String -> Void;
 
 class Parser
 {
-	public function new()
+    var parsers:Map<String, Parser.ParseFunction>;
+    var formatters:Map<String, Parser.FormatFunction>;
+    var plural:ICURule.PluralFunction;
+
+	public function new(culture:String = "en")
     {
+        parsers = new Map<String, Parser.ParseFunction>();
+        formatters = new Map<String, Parser.FormatFunction>();
+        plural = ICURule.Get(culture);
+
+        this
+            .register("literal", null, Literal.Format)
+            .register("var", null, Var.Format)
+            .register("select", Select.Parse, Select.Format)
+            .register("selectordinal", Select.Parse, SelectOrdinal.Format)
+            .register("plural", SelectPlural.Parse, SelectPlural.Format);
     }
 
-    public function parse(str:String)
+    public function register(key:String, p:ParseFunction, f:FormatFunction):Parser
+    {
+        if (parsers.exists(key))
+        {
+            throw "ParserAlreadyRegistered";
+        }
+        parsers.set(key, p);
+        formatters.set(key, f);
+        return this;
+    }
+
+    public function parse(str:String):MessageFormat
     {
         var root = new Node();
         var reader = new StringReader(str);
 
-        while (_parse(reader, root))
-        {}
-
-        var result = new MessageFormat(root);
-        result.set("literal", Literal.Format);
-        result.set("var", Var.Format);
-        return result;
+        while (!reader.eof())
+        {
+            var level:Int = _parse(reader, root);
+            if (0 != level)
+            {
+                throw Parser.Error("UnbalancedBraces", reader);
+            }
+        }
+        return new MessageFormat(root, formatters, plural);
     }
 
-    function _parseExpression(reader:StringReader, parent:Node)
+    public static inline function Error(msg:String, reader:StringReader):String
+    {
+        return "ParseError: `" + msg + "` at " + reader.pos;
+    }
+
+    function _parseExpression(reader:StringReader, parent:Node):Void
     {
         var name = Var.Parse(reader);
         if ("" == name)
         {
-            throw "MissingVarName";
+            throw Parser.Error("MissingVarName", reader);
         }
         else if (reader.isClose())
         {
@@ -35,55 +68,38 @@ class Parser
             return ;
         }
 
-        trace("name: " + name);
-        trace(reader.isClose());
+        // consume ,
+        reader.next();
+
+        var type = Var.Parse(reader);
+        if (!parsers.exists(type))
+        {
+            throw Parser.Error("UnknownType: `" + type + "`", reader);
+        }
+
+        var fn = parsers.get(type);
+        if (null == fn)
+        {
+            throw Parser.Error("UndefinedParseFunc: `" + type + "`", reader);
+        }
+
+        var child = fn(name, this, reader);
+        if (!reader.hasNext() || !reader.isClose())
+        {
+            throw Parser.Error("UnbalancedBraces", reader);
+        }
+        parent.add(type, child);
     }
 
-// func (x *Parser) parseExpression(start, end int, ptr_input *[]rune) (string, Expression, int, error) {
-	// varname, char, pos, err := readVar(start, end, ptr_input)
-	// if nil != err {
-		// return "", nil, pos, err
-	// } else if "" == varname {
-		// return "", nil, pos, fmt.Errorf("MissingVarName")
-	// } else if CloseChar == char {
-		// return "var", varname, pos, nil
-	// }
-
-	// ctype, char, pos, err := readVar(pos+1, end, ptr_input)
-	// if nil != err {
-		// return "", nil, pos, err
-	// }
-
-	// fn, ok := x.parsers[ctype]
-	// if !ok {
-		// return "", nil, pos, fmt.Errorf("UnknownType: `%s`", ctype)
-	// } else if nil == fn {
-		// return "", nil, pos, fmt.Errorf("UndefinedParseFunc: `%s`", ctype)
-	// }
-
-	// expr, pos, err := fn(varname, x, char, pos, end, ptr_input)
-	// if nil != err {
-		// return "", nil, pos, err
-	// }
-
-	// if pos >= end || CloseChar != (*ptr_input)[pos] {
-		// return "", nil, pos, fmt.Errorf("UnbalancedBraces")
-	// }
-	// return ctype, expr, pos, nil
-// }
-
-    function _parse(reader:StringReader, parent:Node)
+    @:allow(messageformat.Select.ReadChoice)
+    function _parse(reader:StringReader, parent:Node):Int
     {
-        var start = reader.pos();
-        var pos = start;
-        var level = 0;
+        var start = reader.pos;
+        var level:Int = 0;
         var escaped = false;
 
-        while (reader.hasNext())
+        while (!reader.eof())
         {
-            // var char = reader.next();
-            reader.next();
-
             if (reader.isEscape())
             {
                 escaped = true;
@@ -94,7 +110,7 @@ class Parser
                 {
                     ++level;
 
-                    if (pos > start)
+                    if (reader.pos > start)
                     {
                         parent.add("literal", Literal.Parse(reader, start));
                     }
@@ -106,8 +122,7 @@ class Parser
 
                     --level;
 
-                    pos = reader.pos();
-                    start = pos + 1;
+                    start = reader.pos + 1;
                 }
 
                 escaped = false;
@@ -123,18 +138,16 @@ class Parser
             }
             else
             {
-                // reader.debug();
-
                 escaped = false;
             }
 
-            ++pos;
+            reader.next();
         }
 
-        if (pos > start)
+        if (reader.pos > start)
         {
             parent.add("literal", Literal.Parse(reader, start));
         }
-        return reader.hasNext();
+        return level;
     }
 }

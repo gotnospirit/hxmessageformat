@@ -2,26 +2,28 @@ package;
 
 #if neko
 import neko.Lib;
+#elseif cpp
+import cpp.Lib;
 #end
 
 class Test
 {
-    public var input(default, null):String;
+    public var input(default, null):Dynamic;
     public var expects(default, null):Array<Expectation>;
 
-    public function new(input:String)
+    public function new(input:Dynamic)
     {
         this.input = input;
         this.expects = new Array<Expectation>();
     }
 
-    public function expect(output:String, ?data:Map<String, Dynamic>)
+    public function expect(output:Dynamic, ?data:Map<String, Dynamic>):Test
     {
         expects.push(new Expectation(output, data, null));
         return this;
     }
 
-    public function throws(error:String, ?data:Map<String, Dynamic>)
+    public function throws(error:String, ?data:Map<String, Dynamic>):Test
     {
         expects.push(new Expectation(null, data, error));
         return this;
@@ -30,11 +32,11 @@ class Test
 
 class Expectation
 {
-    public var output(default, null):String;
+    public var output(default, null):Dynamic;
     public var data(default, null):Map<String, Dynamic>;
     public var error(default, null):String;
 
-    public function new(output:String, data:Map<String, Dynamic>, error:String)
+    public function new(output:Dynamic, data:Map<String, Dynamic>, error:String)
     {
         this.output = output;
         this.data = data;
@@ -44,28 +46,28 @@ class Expectation
 
 class TestSuite
 {
-    var t:Array<Test>;
+    var tests:Array<Test>;
     var verbose:Bool;
 
     public function new(verbose:Bool)
     {
-        t = new Array<Test>();
+        tests = new Array<Test>();
         this.verbose = verbose;
     }
 
-    function add(input:String)
+    function add(input:Dynamic):Test
     {
         var result:Test = new Test(input);
-        t.push(result);
+        tests.push(result);
         return result;
     }
 
-    function fails(msg:String)
+    function fails(msg:String):Void
     {
         print("- " + msg + "\n");
     }
 
-    function success(msg:String)
+    function success(msg:String):Void
     {
         if (verbose)
         {
@@ -73,17 +75,26 @@ class TestSuite
         }
     }
 
-    function print(msg:String)
+    function print(msg:String):Void
     {
+#if (neko || cpp)
         Lib.print(msg);
+#else
+        trace(StringTools.trim(msg));
+#end
     }
 
-    function doTest(t:Test, e:Expectation)
+    function test(t:Test, e:Expectation):Dynamic
     {
-        return "";
+        throw "Method `test` must be overloaded.";
     }
 
-    public function run()
+    function compare(result:Dynamic, expected:Dynamic):Bool
+    {
+        return result == expected;
+    }
+
+    public function run():Void
     {
         var runned = 0;
         var failed = 0;
@@ -91,22 +102,22 @@ class TestSuite
 
         print(Type.getClassName(Type.getClass(this)) + "\n");
 
-        for (test in t)
+        for (t in tests)
         {
-            for (expect in test.expects)
+            for (expect in t.expects)
             {
                 try
                 {
-                    var result = doTest(test, expect);
+                    var result = test(t, expect);
 
                     if (null != expect.error)
                     {
-                        fails("`" + test.input + "` should threw <" + expect.error + "> but got none");
+                        fails("`" + t.input + "` should threw <" + expect.error + "> but got none");
                         ++failed;
                     }
-                    else if (result != expect.output)
+                    else if (!compare(result, expect.output))
                     {
-                        fails("`" + test.input + "`: Expecting <" + expect.output + "> but got <" + result + ">");
+                        fails("`" + t.input + "`: Expecting <" + expect.output + "> but got <" + result + ">");
                         ++failed;
                     }
                     else
@@ -121,7 +132,7 @@ class TestSuite
                     {
                         if (err != expect.error)
                         {
-                            fails("`" + test.input + "` should threw <" + expect.error + "> but got <" + err + ">");
+                            fails("`" + t.input + "` should threw <" + expect.error + "> but got <" + err + ">");
                             ++failed;
                         }
                         else
@@ -132,7 +143,7 @@ class TestSuite
                     }
                     else
                     {
-                        fails("`" + test.input + "` threw <" + err + ">");
+                        fails("`" + t.input + "` threw <" + err + ">");
                         ++failed;
                     }
                 }
