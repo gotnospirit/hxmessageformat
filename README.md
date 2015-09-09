@@ -1,1 +1,3 @@
-cls && haxe -main Main --interp -cp src
+Run Unit Test:
+
+cls && haxe -main Main --interp -cp src -cp tests
