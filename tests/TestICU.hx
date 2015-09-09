@@ -68,7 +68,7 @@ class TestICU extends TestSuite
         this.createFinvtwTest(0.99999)
             .expect({ f: 99999, i: 0, n: 0.99999, v: 5, t: 99999, w: 5});
 
-        // les floats ça marche jamais comme il faut :(
+        // les floats ?a marche jamais comme il faut :(
         this.createFinvtwTest(100000000000.2)
             .expect({ f: 2, i: 100000000000, n: 100000000000.2, v: 1, t: 2, w: 1});
 

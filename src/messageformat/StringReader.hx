@@ -39,13 +39,18 @@ class StringReader
         return result;
     }
 
-    public function next():Void
+    public function next():Int
     {
         if (++pos < length)
         {
             c = Utf8.charCodeAt(s, pos);
             w = 0;
         }
+        else
+        {
+            c = 0;
+        }
+        return c;
     }
 
     public function isEscape():Bool

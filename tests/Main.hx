@@ -7,6 +7,6 @@ class Main
         new TestFormat().run();
         new TestICU().run();
         new TestUtils().run();
-        // new TestStringReader().run();
+        new TestStringReader().run();
 	}
 }
