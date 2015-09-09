@@ -6,15 +6,32 @@ import neko.Lib;
 import cpp.Lib;
 #end
 
+typedef TestFunction = Test -> Expectation -> Dynamic;
+typedef CompareFunction = Dynamic -> Dynamic -> Bool;
+
 class Test
 {
     public var input(default, null):Dynamic;
     public var expects(default, null):Array<Expectation>;
+    public var fnTest(default, null):TestFunction;
+    public var fnCompare(default, null):CompareFunction;
 
     public function new(input:Dynamic)
     {
         this.input = input;
-        this.expects = new Array<Expectation>();
+        expects = new Array<Expectation>();
+    }
+
+    public function test(fn:TestFunction):Test
+    {
+        fnTest = fn;
+        return this;
+    }
+
+    public function compare(fn:CompareFunction):Test
+    {
+        fnCompare = fn;
+        return this;
     }
 
     public function expect(output:Dynamic, ?data:Map<String, Dynamic>):Test
@@ -84,38 +101,45 @@ class TestSuite
 #end
     }
 
-    function test(t:Test, e:Expectation):Dynamic
-    {
-        throw "Method `test` must be overloaded.";
-    }
+    // function test(t:Test, e:Expectation):Dynamic
+    // {
+        // throw "Method `test` must be overloaded.";
+    // }
 
-    function compare(result:Dynamic, expected:Dynamic):Bool
-    {
-        return result == expected;
-    }
+    // function compare(result:Dynamic, expected:Dynamic):Bool
+    // {
+        // return result == expected;
+    // }
 
     public function run():Void
     {
         var runned = 0;
         var failed = 0;
         var succeed = 0;
+        var ignored = 0;
 
         print(Type.getClassName(Type.getClass(this)) + "\n");
 
         for (t in tests)
         {
+            if (null == t.fnTest || null == t.fnCompare)
+            {
+                ++ignored;
+                continue;
+            }
+
             for (expect in t.expects)
             {
                 try
                 {
-                    var result = test(t, expect);
+                    var result = t.fnTest(t, expect);
 
                     if (null != expect.error)
                     {
                         fails("`" + t.input + "` should threw <" + expect.error + "> but got none");
                         ++failed;
                     }
-                    else if (!compare(result, expect.output))
+                    else if (!t.fnCompare(result, expect.output))
                     {
                         fails("`" + t.input + "`: Expecting <" + expect.output + "> but got <" + result + ">");
                         ++failed;
@@ -151,7 +175,7 @@ class TestSuite
             }
         }
 
-        print("Total: " + runned + ", Succeed: " + succeed + ", Failed: " + failed + "\n");
+        print("Total: " + runned + ", Succeed: " + succeed + ", Failed: " + failed + ", Ignored: " + ignored + "\n");
 
         print("\n");
     }
