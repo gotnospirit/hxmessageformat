@@ -45,14 +45,4 @@ class Node
             child.format(output, mf, params, pound);
         }
     }
-
-    public function debug():Void
-    {
-        trace("nb children: " + children.length);
-
-        for (i in 0...children.length)
-        {
-            trace(children[i]);
-        }
-    }
 }

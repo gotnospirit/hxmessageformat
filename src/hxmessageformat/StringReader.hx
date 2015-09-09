@@ -116,18 +116,4 @@ class StringReader
     {
         return Utf8.sub(s, start, end - start);
     }
-
-    public function debug(?prefix:String):Void
-    {
-        var char = String.fromCharCode(c);
-
-        if (null != prefix)
-        {
-            trace(prefix + char + " (" + c + " at " + pos + ")");
-        }
-        else
-        {
-            trace(char + " (" + c + " at " + pos + ")");
-        }
-    }
 }
