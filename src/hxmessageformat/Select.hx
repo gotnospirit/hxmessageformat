@@ -1,4 +1,4 @@
-package messageformat;
+package hxmessageformat;
 
 class Select
 {

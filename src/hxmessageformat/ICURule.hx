@@ -1,4 +1,4 @@
-package messageformat;
+package hxmessageformat;
 
 typedef PluralFunction = Dynamic -> Bool -> String;
 

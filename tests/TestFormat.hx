@@ -1,6 +1,6 @@
 package;
 
-import messageformat.Parser;
+import hxmessageformat.Parser;
 
 class TestFormat extends TestSuite
 {

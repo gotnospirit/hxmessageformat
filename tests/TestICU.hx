@@ -1,6 +1,6 @@
 package;
 
-import messageformat.ICURule;
+import hxmessageformat.ICURule;
 
 class TestICU extends TestSuite
 {

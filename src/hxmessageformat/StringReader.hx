@@ -1,4 +1,4 @@
-package messageformat;
+package hxmessageformat;
 
 import haxe.Utf8;
 

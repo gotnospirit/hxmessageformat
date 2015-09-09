@@ -1,6 +1,6 @@
 package;
 
-import messageformat.StringReader;
+import hxmessageformat.StringReader;
 
 class TestStringReader extends TestSuite
 {

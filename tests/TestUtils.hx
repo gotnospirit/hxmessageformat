@@ -1,5 +1,7 @@
 package;
 
+import hxmessageformat.Utils;
+
 class TestUtils extends TestSuite
 {
     public function new(verbose:Bool = false)
@@ -70,7 +72,7 @@ class TestUtils extends TestSuite
         return this.add(input)
             .test(function (t:TestSuite.Test, e:TestSuite.Expectation):Dynamic
             {
-                return messageformat.Utils.ParseFloat(t.input);
+                return Utils.ParseFloat(t.input);
             })
             .compare(function (result:Dynamic, expected:Dynamic):Bool
             {
@@ -83,7 +85,7 @@ class TestUtils extends TestSuite
         return this.add(input)
             .test(function (t:TestSuite.Test, e:TestSuite.Expectation):Dynamic
             {
-                return messageformat.Utils.ParseInt(t.input);
+                return Utils.ParseInt(t.input);
             })
             .compare(function (result:Dynamic, expected:Dynamic):Bool
             {
@@ -96,7 +98,7 @@ class TestUtils extends TestSuite
         return this.add(input)
             .test(function (t:TestSuite.Test, e:TestSuite.Expectation):Dynamic
             {
-                return messageformat.Utils.MapToString(t.input, e.data);
+                return Utils.MapToString(t.input, e.data);
             })
             .compare(function (result:Dynamic, expected:Dynamic):Bool
             {
@@ -109,7 +111,7 @@ class TestUtils extends TestSuite
         return this.add(input)
             .test(function (t:TestSuite.Test, e:TestSuite.Expectation):Dynamic
             {
-                return messageformat.Utils.ToString(t.input);
+                return Utils.ToString(t.input);
             })
             .compare(function (result:Dynamic, expected:Dynamic):Bool
             {

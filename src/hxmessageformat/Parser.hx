@@ -1,4 +1,4 @@
-package messageformat;
+package hxmessageformat;
 
 typedef ParseFunction = String -> Parser -> StringReader -> Dynamic;
 typedef FormatFunction = Dynamic -> StringBuf -> Map<String, Dynamic> -> MessageFormat -> String -> Void;
@@ -91,7 +91,7 @@ class Parser
         parent.add(type, child);
     }
 
-    @:allow(messageformat.Select.ReadChoice)
+    @:allow(hxmessageformat.Select.ReadChoice)
     function _parse(reader:StringReader, parent:Node):Int
     {
         var start = reader.pos;
